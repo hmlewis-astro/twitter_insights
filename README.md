@@ -6,9 +6,9 @@ Twitter Analytics can provide useful insights for users by providing, for exampl
 
 ## Data & Analysis
 
-As an example, I have scraped Follower counts from web archives—including the Wayback Machine and the Stanford Web Archive Portal—and all Tweets from the popular account WeRateDogs (`@dog_rates`). Ideally, however, the owner of an account would just download an archive of their Twitter data for use. Given these data for WeRateDogs ([Follower counts here](dog_rates_follower_count.h5) and [Tweets here](dog_rates_tweets_archive.h5), approx. 8 MB total), I run an unsupervised clustering algorithm on the continuous (number of favorites and retweets counts, and number of favorites per Follower) and categorical data (hashtags, user mentions, URLs, media type, and whether the Tweet is a reply to a user or a retweet) to extract advertisements.
+As an example, I have scraped Follower counts from web archives—including the Wayback Machine and the Stanford Web Archive Portal—and all Tweets from the popular account WeRateDogs (`@dog_rates`). Ideally, however, the owner of an account would just download an archive of their Twitter data for use. Given these data for WeRateDogs ([Follower counts here](dog_rates_follower_count.h5) and [Tweets here](dog_rates_tweets_archive.h5), approx. 9 MB total), I run an unsupervised clustering algorithm on the continuous (number of favorites and retweets counts, and number of favorites per Follower) and categorical data (hashtags, user mentions, URLs, media type, and whether the Tweet is a reply to a user or a retweet) to extract advertisements.
 
-For the WeRateDogs Tweet archive, Tweets are assigned to 6 clusters. The clusters ([shown below](https://github.com/hmlewis-astro/twitter_insights/blob/master/dog_rates_clusters.png)) are differentiated primarily by the number of favorites and reteweets each Tweet receives, but also depend on whether a Tweet included a link to a product page or a fundraiser, or a specific hashtag.    
+For the WeRateDogs Tweet archive, Tweets are assigned to 6 clusters. The clusters ([shown below](https://github.com/hmlewis-astro/twitter_insights/blob/master/dog_rates_clusters.png)) are differentiated primarily by the number of favorites and reteweets each Tweet receives, but also depend on whether a Tweet included a link to a product page or a fundraiser, or a specific hashtag. 
 
 ![WeRateDogs Tweet clustering](https://github.com/hmlewis-astro/twitter_insights/blob/master/dog_rates_clusters.png)
 
@@ -32,7 +32,6 @@ To run via the Command Line:
 python twitter_data_impact.py 
 ```
 When prompted, enter the cluster number that appears to have the most advertisement-like Tweets (includes link to product website/fundraisers, may use the hashtag `ad`, etc.)
-
 
 These scripts will produce the plot shown above, as well as a plot of the inertia of the clustering algorithm for an increasing number of clusters; this [plot](https://github.com/hmlewis-astro/twitter_insights/blob/master/dog_rates_inertia_n_clusters.png) is used to determine the optimal number of clusters for the clustering algorithm. A [PDF](https://github.com/hmlewis-astro/twitter_insights/blob/master/dog_rates_lossy_tweets.pdf) containing a sampling of the advertisements that caused a significant number of Followers to unfollow the account is also created.
 
