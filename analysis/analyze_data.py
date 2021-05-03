@@ -83,12 +83,69 @@ def combine_archives(thandle):
     return tweets_concat
 
 
+def nclusters_plot(thandle, n_clusters, inertia, k):
+	plt.plot(range(1,n_clusters+1), inertia, c='dodgerblue')
+	plt.xlabel('k')
+	plt.ylabel('Inertia')
+	plt.axvline(k, c='k', ls='--')
+
+	plt.tight_layout()
+	plt.savefig('{}/inertia_n_clusters.png'.format(thandle), dpi=300)
+	plt.close()
+	
+	
+def fav_plot(thandle, K, grouped_clusters, tweets_clip):
+
+	cgen = mpl.cm.viridis([c/(K-1) for c in range(K)])
+		
+	fig, ax = plt.subplots(1,2, figsize=(12,6))
+	
+	for c,df in grouped_clusters:
+		ax[0].scatter(df.created_at, df.favorite_count, color=cgen[c], s=15, label='Cluster {}'.format(c+1))
+
+	ax[0].set_xlabel('Date')
+	ax[0].set_ylabel('$N_\mathrm{Favorites}$')
+	ax[0].set_title('Favorites per Tweet')
+	ax[0].axhline(0.0, c='k', ls='--')
+	ticks = [datetime.datetime.strptime('{}-01-01'.format(y), '%Y-%m-%d') for y in range(tweets_clip.created_at.min().year, tweets_clip.created_at.max().year + 1)]
+	tick_labels = [xs.year for xs in ticks]
+	if ticks[0] + datetime.timedelta(days=180) < df.created_at.min():
+		ticks = ticks[1:]
+		tick_labels = tick_labels[1:]
+	if ticks[-1] - datetime.timedelta(days=180) > df.created_at.max():
+		ticks.append(ticks[-1]+datetime.timedelta(days=365))
+		tick_labels.append(tick_labels[-1]+1)
+    
+	ax[0].set_xticks(ticks)
+	ax[0].set_xticklabels(tick_labels)
+
+	ax[0].yaxis.set_major_formatter(tick.FuncFormatter(format_ticks.reformat_large_tick_values))
+
+	for c,df in grouped_clusters:
+		ax[1].scatter(df.retweet_count, df.favorite_count, color=cgen[c], s=15, label='Cluster {}'.format(c+1))
+            
+	ax[1].set_xlabel('$N_\mathrm{Retweets}$')
+	ax[1].set_ylabel('$N_\mathrm{Favorites}$')
+	ax[1].set_title('Favorites vs. Retweets')
+	ax[1].set_xscale('log')
+	ax[1].set_xlim(0.5, max(tweets_clip.retweet_count)*1.5)
+	ax[1].set_yscale('log')
+	ax[1].set_ylim(0.05, max(tweets_clip.favorite_count)*1.5)
+
+	ax[1].legend(loc=4, fontsize=12)
+
+	fig.suptitle('@{}'.format(thandle), fontsize=24)
+
+	plt.tight_layout()
+	fig.savefig('{}/clusters.png'.format(thandle), dpi=300)
+	plt.close()
+	
+
 def cluster_tweets(thandle, tweets_concat, cluster=True):
     """
     Runs clustering algorithm to extract Tweets that are most ad-like.
     """
     from kneed import KneeLocator
-    import matplotlib.pyplot as plt
     # interested in time period following intial growth, where change in followers between Tweets drops below 0.5%
     #TODO: better way to remove period of initial growth, since 0.5% might not be a good limit for all users
     idx = tweets_concat.where(tweets_concat.delta_follower_pct>0.5).last_valid_index()
@@ -141,18 +198,9 @@ def cluster_tweets(thandle, tweets_concat, cluster=True):
         K = kn.knee
         #print('Optimal number of clusters:', K)
 
-        #TODO: remove from app, just for prelimiary check
-        '''
-        plt.plot(range(1,n_clusters+1), inertia, c='dodgerblue')
-        plt.xlabel('k')
-        plt.ylabel('Inertia')
-        plt.axvline(K, c='k', ls='--')
-
-        plt.tight_layout()
-        plt.savefig('{}/inertia_n_clusters.png'.format(thandle), dpi=300)
-        plt.close()
-        plt.show()
-        '''
+        #TODO: remove from app, just for preliminary check
+        
+        nclusters_plot(thandle, n_clusters, inertia, K)
     
         #TODO: scale data after OHE
         model = KMeans(n_clusters=K, random_state=seed).fit(pd.get_dummies(tweets_clustering))
@@ -160,54 +208,11 @@ def cluster_tweets(thandle, tweets_concat, cluster=True):
         
         grouped_clusters = tweets_clip.groupby(pred)
     
-		#TODO: remove from app, just for prelimiary check
-        '''
+    
+		#TODO: remove from app, just for preliminary check
         # plot the clusters
-        fig, ax = plt.subplots(1,2, figsize=(12,6))
-
-
-        cgen = mpl.cm.viridis([c/(K-1) for c in range(K)])
-
-        for c,df in grouped_clusters:
-            ax[0].scatter(df.created_at, df.favorite_count, color=cgen[c], s=15, label='Cluster {}'.format(c+1))
-
-        ax[0].set_xlabel('Date')
-        ax[0].set_ylabel('$N_\mathrm{Favorites}$')
-        ax[0].set_title('Favorites per Tweet')
-        ax[0].axhline(0.0, c='k', ls='--')
-        xticks = [datetime.datetime.strptime('{}-01-01'.format(y), '%Y-%m-%d') for y in range(tweets_clip.created_at.min().year, tweets_clip.created_at.max().year + 1)]
-        xtick_labels = [x.year for x in xticks]
-        if xticks[0] + datetime.timedelta(days=180) < df.created_at.min():
-            xticks = xticks[1:]
-            xtick_labels = xtick_labels[1:]
-        if xticks[-1] - datetime.timedelta(days=180) > df.created_at.max():
-            xticks.append(xticks[-1]+datetime.timedelta(days=365))
-            xtick_labels.append(xtick_labels[-1]+1)
-    
-        ax[0].set_xticks(xticks)
-        ax[0].set_xticklabels(xtick_labels)
-
-        ax[0].yaxis.set_major_formatter(tick.FuncFormatter(format_ticks))
-
-        for c,df in grouped_clusters:
-            ax[1].scatter(df.retweet_count, df.favorite_count, color=cgen[c], s=15, label='Cluster {}'.format(c+1))
-            
-        ax[1].set_xlabel('$N_\mathrm{Retweets}$')
-        ax[1].set_ylabel('$N_\mathrm{Favorites}$')
-        ax[1].set_title('Favorites vs. Retweets')
-        ax[1].set_xscale('log')
-        ax[1].set_xlim(0.5, max(tweets_clip.retweet_count)*1.5)
-        ax[1].set_yscale('log')
-        ax[1].set_ylim(0.05, max(tweets_clip.favorite_count)*1.5)
-
-        ax[1].legend(loc=4, fontsize=12)
-
-        fig.suptitle('@{}'.format(thandle), fontsize=24)
-        fig.show()
-    
-        plt.tight_layout()
-        plt.savefig('{}/clusters.pdf'.format(thandle), dpi=300)
-        '''
+        fav_plot(thandle, K, grouped_clusters, tweets_clip)
+        
 		
         # info about the clusters
         for c, df in grouped_clusters:
