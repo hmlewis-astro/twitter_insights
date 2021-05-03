@@ -14,7 +14,7 @@ For the WeRateDogs Tweet archive, Tweets are assigned to 6 clusters. The cluster
 
 ![WeRateDogs Tweet clustering](https://github.com/hmlewis-astro/twitter_insights/blob/master/dog_rates/clusters.png)
 
-Following each advertisement (identified as Cluster 5 in this example, which contained the hashtags #TrupanionPartner, #partner, and #RoyalCaninPuppies, and a number of gofundme and business website URLs), I then track changes in the number of Followers over the next 7 days, to see if any one ad has caused a significant number of Followers to unfollow the account.
+Following each advertisement—identified as Cluster 5 in this example, which contained many Tweets with the hashtags #TrupanionPartner, #partner, and #RoyalCaninPuppies, and a number of GoFundMe and business website URLs—I then track changes in the number of Followers over the next 7 days, to see if any one ad has caused a significant number of Followers to unfollow the account.
 
 ## Results
 
