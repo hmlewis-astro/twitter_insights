@@ -23,7 +23,7 @@ For ads Tweeted by WeRateDogs, this initial analysis shows that some Tweets revo
 Clone the repository.
 To run via the Jupyter Notebook: 
 ```sh
-jupyter notebook haberman_analysis.ipynb
+jupyter notebook twitter_data_impact.ipynb
 ```
 Run all cells (select "Cell" > "Run All" or press Shift+Return to run individual cells).
 
